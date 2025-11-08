@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { account } from "../lib/appwrite";
 import { Models } from "appwrite";
 import { useRouter } from "next/navigation";
@@ -15,24 +15,47 @@ export default function AuthGuard({ children }: AuthGuardProps) {
   );
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const isMountedRef = useRef(false);
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
       const currentUser = await account.get();
-      setUser(currentUser);
-      setLoading(false);
+      if (isMountedRef.current) {
+        setUser(currentUser);
+        setLoading(false);
+      }
     } catch (error) {
+      // Logge Authentifizierungsfehler für Debugging
+      const errorMessage =
+        error instanceof Error ? error.message : "Unbekannter Fehler";
+      const errorType =
+        error instanceof Error ? error.constructor.name : typeof error;
+
+      console.error("[AuthGuard] Authentifizierung fehlgeschlagen:", {
+        type: errorType,
+        message: errorMessage,
+        timestamp: new Date().toISOString(),
+        // Keine sensiblen Daten loggen (kein vollständiges Error-Objekt)
+      });
+
       // User ist nicht eingeloggt
-      setUser(null);
-      setLoading(false);
+      if (isMountedRef.current) {
+        setUser(null);
+        setLoading(false);
+      }
       // Optional: Weiterleitung zur Login-Seite
       // router.push("/login");
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    checkAuth();
+
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, [checkAuth]);
 
   if (loading) {
     return (
