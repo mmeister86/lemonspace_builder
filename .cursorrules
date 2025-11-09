@@ -1,0 +1,295 @@
+# LemonSpace.io Builder - Cursor Rules
+
+## Projekt-Übersicht
+
+LemonSpace.io ist eine No-Code Drag&Drop-Plattform für Vertriebsmitarbeiter, um interaktive Marketing Boards zu erstellen und zu teilen.
+
+## Tech Stack
+
+### Core Framework
+
+- **Next.js 15.5** mit App Router (nicht Pages Router)
+- **React 19** mit Server Components wo möglich
+- **TypeScript** mit strikten Type-Checks
+- **Turbopack** für Development (--turbopack Flag verwenden)
+
+### UI & Styling
+
+- **ShadCN UI** als UI-Komponenten-Bibliothek (New York Style)
+- **Tailwind CSS 4** für Styling
+- **Lucide React** für Icons
+- **Framer Motion** für Animationen und Transitions
+- **class-variance-authority** für Varianten-Management
+
+### State Management & Data Fetching
+
+- **Zustand** für Client-Side State Management
+- **TanStack Query** (@tanstack/react-query) für Server State und API Calls
+- **React Hook Form** + **Zod** für Formulare und Validierung
+
+### Drag & Drop
+
+- **@dnd-kit** (core, sortable, modifiers) für Drag&Drop-Funktionalität
+
+### Text Editing
+
+- **ProseKit** (@prosekit/core, @prosekit/react) für Inline-Text-Editierung
+
+### Backend & Services
+
+- **AppWrite** als BaaS (Authentication, Database, Storage)
+- **Resend** für E-Mail-Versand (zukünftig)
+
+## Projektstruktur
+
+```
+/app                    # Next.js App Router
+  /components          # App-spezifische Komponenten
+  /lib                 # App-spezifische Utilities
+  /page.tsx            # Root Page
+  /layout.tsx           # Root Layout
+  /globals.css         # Global Styles
+/components             # Shared Components
+  /ui                  # ShadCN UI Komponenten
+/lib                    # Shared Utilities
+/docs                  # Dokumentation
+```
+
+## Code-Stil & Best Practices
+
+### TypeScript
+
+- Strikte Type-Safety verwenden
+- Interfaces für Datenstrukturen bevorzugen
+- Type Guards für Runtime-Validierung nutzen
+- Keine `any` Types ohne gute Begründung
+
+### React Patterns
+
+- **Server Components** als Default, Client Components nur wenn nötig
+- `"use client"` nur bei Interaktivität, State oder Browser APIs
+- Props mit TypeScript Interfaces definieren
+- Custom Hooks für wiederverwendbare Logik
+- Compound Components für komplexe UI-Patterns
+
+### Naming Conventions
+
+- **Komponenten**: PascalCase (z.B. `BoardBuilder.tsx`)
+- **Hooks**: camelCase mit "use" Prefix (z.B. `useBoardState.ts`)
+- **Utilities**: camelCase (z.B. `formatDate.ts`)
+- **Types/Interfaces**: PascalCase (z.B. `BoardConfig`, `UserData`)
+- **Constants**: UPPER_SNAKE_CASE (z.B. `MAX_BOARD_COLUMNS`)
+
+### File Organization
+
+- Eine Komponente pro Datei
+- Co-locate verwandte Dateien (z.B. `Board.tsx`, `Board.test.tsx`, `Board.types.ts`)
+- Index-Dateien für Barrel Exports vermeiden (außer bei UI-Komponenten)
+
+### Imports
+
+- Absolute Imports mit `@/` Prefix verwenden (konfiguriert in tsconfig.json)
+- Gruppiere Imports: External → Internal → Relative
+- Sortiere alphabetisch innerhalb jeder Gruppe
+
+```typescript
+// External
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+
+// Internal
+import { Button } from "@/components/ui/button";
+import { useBoardStore } from "@/lib/stores/board-store";
+
+// Relative
+import { BoardPreview } from "./board-preview";
+```
+
+## Architektur-Prinzipien
+
+### Builder-Architektur
+
+- **Grid-System**: Maximal 4 Spalten auf Desktop, responsive für Tablet/Mobile
+- **Viewport-Switching**: Echtzeit-Vorschau für verschiedene Geräte
+- **Inline-Editing**: ProseKit für direkte Textbearbeitung
+- **Property Panel**: Slide-in Panel von rechts für Block-Einstellungen
+- **Builder/Preview Toggle**: Umschaltung zwischen Bearbeitungs- und Ansichtsmodus
+
+### State Management Strategie
+
+- **Zustand Stores**: Für Builder-State (aktuelle Board-Konfiguration, selektierte Blöcke, etc.)
+- **TanStack Query**: Für Server-Daten (Boards, Media, Analytics)
+- **React Hook Form**: Für alle Formulare
+- **URL State**: Für Filter, Pagination, Viewport-Mode
+
+### Datenmodell
+
+- Boards als JSON-Strukturen speichern (grid_config, blocks)
+- UUIDs für alle IDs verwenden
+- Timestamps als ISO-Strings
+- User-Isolation strikt einhalten (user_id in allen Queries)
+
+## ShadCN UI Guidelines
+
+### Komponenten hinzufügen
+
+```bash
+npx shadcn@latest add [component-name]
+```
+
+### Styling
+
+- Tailwind CSS Utility Classes bevorzugen
+- ShadCN Variants für Komponenten-Varianten nutzen
+- CSS Variables für Theming (bereits konfiguriert)
+- Responsive Design: Mobile-First Approach
+
+### Custom Components
+
+- Erweitere ShadCN Komponenten, statt sie zu überschreiben
+- Nutze `cn()` Utility für Conditional Classes
+- Props-Spreading für ShadCN Komponenten verwenden
+
+## Performance-Optimierungen
+
+### Code Splitting
+
+- Dynamic Imports für große Komponenten (`next/dynamic`)
+- Lazy Loading für nicht-kritische Features
+
+### Images & Media
+
+- Next.js Image Component verwenden
+- Lazy Loading für Bilder außerhalb Viewport
+- Optimierte Thumbnails für Media-Galerien
+
+### Rendering
+
+- Server Components wo möglich
+- React.memo für teure Client Components
+- useMemo/useCallback für teure Berechnungen
+
+### Bundle Size
+
+- Tree-Shaking sicherstellen
+- Unused Dependencies entfernen
+- Code Splitting für große Libraries
+
+## Sicherheit
+
+### Authentication
+
+- AppWrite Authentication verwenden
+- Auth Guards für geschützte Routes
+- Server-Side Session-Validierung
+
+### Data Validation
+
+- Zod Schemas für alle User-Inputs
+- Server-Side Validierung zusätzlich zu Client-Side
+- Sanitization für User-generierte Inhalte
+
+### Content Security
+
+- Sandbox für Code-Blocks (iFrames)
+- Upload-Validierung (Dateityp, Größe)
+- Rate Limiting für API-Endpoints
+
+## Testing (zukünftig)
+
+- Unit Tests für Utilities
+- Integration Tests für kritische Flows
+- E2E Tests für User-Journeys
+
+## Git Workflow
+
+- Meaningful Commit Messages
+- Feature Branches für neue Features
+- PR Reviews vor Merge
+
+## Wichtige Hinweise
+
+### Was LemonSpace NICHT ist
+
+- Kein Website-Builder
+- Kein vollwertiges CMS
+- Keine E-Mail-Marketing-Plattform
+- Kein Präsentations-Tool (wie PowerPoint)
+
+### Was LemonSpace IST
+
+- Eine Brücke zwischen E-Mail und Website
+- Ein Tool für personalisierte Verkaufserlebnisse
+- Eine Plattform für messbare Kunden-Interaktionen
+- Ein No-Code-Tool für Nicht-Techniker
+
+## Code-Beispiele
+
+### Zustand Store Pattern
+
+```typescript
+import { create } from "zustand";
+
+interface BoardState {
+  currentBoard: Board | null;
+  selectedBlockId: string | null;
+  setCurrentBoard: (board: Board) => void;
+  setSelectedBlock: (id: string | null) => void;
+}
+
+export const useBoardStore = create<BoardState>((set) => ({
+  currentBoard: null,
+  selectedBlockId: null,
+  setCurrentBoard: (board) => set({ currentBoard: board }),
+  setSelectedBlock: (id) => set({ selectedBlockId: id }),
+}));
+```
+
+### TanStack Query Pattern
+
+```typescript
+import { useQuery } from "@tanstack/react-query";
+import { appwrite } from "@/lib/appwrite";
+
+export function useBoard(boardId: string) {
+  return useQuery({
+    queryKey: ["board", boardId],
+    queryFn: () => appwrite.getBoard(boardId),
+    enabled: !!boardId,
+  });
+}
+```
+
+### React Hook Form + Zod Pattern
+
+```typescript
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
+const boardSchema = z.object({
+  title: z.string().min(1).max(100),
+  slug: z.string().regex(/^[a-z0-9-]+$/),
+});
+
+type BoardFormData = z.infer<typeof boardSchema>;
+
+export function BoardForm() {
+  const form = useForm<BoardFormData>({
+    resolver: zodResolver(boardSchema),
+  });
+  // ...
+}
+```
+
+## Package Manager
+
+- **pnpm** als Package Manager verwenden (nicht npm oder yarn)
+
+## Weitere Ressourcen
+
+- Masterplan: `/docs/masterplan.md`
+- ShadCN Docs: https://ui.shadcn.com
+- Next.js Docs: https://nextjs.org/docs
+- AppWrite Docs: https://appwrite.io/docs
+

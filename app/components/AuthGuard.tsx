@@ -1,61 +1,13 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
-import { account } from "../lib/appwrite";
-import { Models } from "appwrite";
-import { useRouter } from "next/navigation";
+import { useUser } from "../lib/user-context";
 
 interface AuthGuardProps {
   children: React.ReactNode;
 }
 
 export default function AuthGuard({ children }: AuthGuardProps) {
-  const [user, setUser] = useState<Models.User<Models.Preferences> | null>(
-    null
-  );
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
-  const isMountedRef = useRef(false);
-
-  const checkAuth = useCallback(async () => {
-    try {
-      const currentUser = await account.get();
-      if (isMountedRef.current) {
-        setUser(currentUser);
-        setLoading(false);
-      }
-    } catch (error) {
-      // Logge Authentifizierungsfehler für Debugging
-      const errorMessage =
-        error instanceof Error ? error.message : "Unbekannter Fehler";
-      const errorType =
-        error instanceof Error ? error.constructor.name : typeof error;
-
-      console.error("[AuthGuard] Authentifizierung fehlgeschlagen:", {
-        type: errorType,
-        message: errorMessage,
-        timestamp: new Date().toISOString(),
-        // Keine sensiblen Daten loggen (kein vollständiges Error-Objekt)
-      });
-
-      // User ist nicht eingeloggt
-      if (isMountedRef.current) {
-        setUser(null);
-        setLoading(false);
-      }
-      // Optional: Weiterleitung zur Login-Seite
-      // router.push("/login");
-    }
-  }, []);
-
-  useEffect(() => {
-    isMountedRef.current = true;
-    checkAuth();
-
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, [checkAuth]);
+  const { user, loading, error } = useUser();
 
   if (loading) {
     return (
@@ -68,7 +20,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
     );
   }
 
-  if (!user) {
+  if (!user || error) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">

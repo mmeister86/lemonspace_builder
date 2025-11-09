@@ -1,0 +1,171 @@
+"use client";
+
+import * as React from "react";
+import {
+  Layout,
+  Image,
+  FileText,
+  Settings2,
+  LifeBuoy,
+  Send,
+  Sparkles,
+} from "lucide-react";
+
+import { NavMain } from "@/components/nav-main";
+import { NavProjects } from "@/components/nav-projects";
+import { NavSecondary } from "@/components/nav-secondary";
+import { NavUser } from "@/components/nav-user";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
+import { useUser } from "@/app/lib/user-context";
+
+const data = {
+  navMain: [
+    {
+      title: "Boards",
+      url: "#",
+      icon: Layout,
+      isActive: true,
+      items: [
+        {
+          title: "Alle Boards",
+          url: "#",
+        },
+        {
+          title: "Favoriten",
+          url: "#",
+        },
+        {
+          title: "Zuletzt verwendet",
+          url: "#",
+        },
+      ],
+    },
+    {
+      title: "Media",
+      url: "#",
+      icon: Image,
+      items: [
+        {
+          title: "Bilder",
+          url: "#",
+        },
+        {
+          title: "Videos",
+          url: "#",
+        },
+        {
+          title: "Uploads",
+          url: "#",
+        },
+      ],
+    },
+    {
+      title: "Templates",
+      url: "#",
+      icon: FileText,
+      items: [
+        {
+          title: "Vorlagen durchsuchen",
+          url: "#",
+        },
+        {
+          title: "Meine Vorlagen",
+          url: "#",
+        },
+      ],
+    },
+    {
+      title: "Einstellungen",
+      url: "#",
+      icon: Settings2,
+      items: [
+        {
+          title: "Allgemein",
+          url: "#",
+        },
+        {
+          title: "Account",
+          url: "#",
+        },
+        {
+          title: "Abonnement",
+          url: "#",
+        },
+      ],
+    },
+  ],
+  navSecondary: [
+    {
+      title: "Support",
+      url: "#",
+      icon: LifeBuoy,
+    },
+    {
+      title: "Feedback",
+      url: "#",
+      icon: Send,
+    },
+  ],
+  projects: [
+    {
+      name: "Mein erstes Board",
+      url: "#",
+      icon: Sparkles,
+    },
+  ],
+};
+
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { user } = useUser();
+
+  // User-Daten aus AppWrite in das Format für NavUser umwandeln
+  const userData = user
+    ? {
+        name: user.name || user.email?.split("@")[0] || "User",
+        email: user.email || "",
+        avatar: "", // AppWrite speichert Avatar-URLs anders, falls vorhanden
+      }
+    : {
+        name: "User",
+        email: "",
+        avatar: "",
+      };
+
+  return (
+    <Sidebar variant="inset" {...props}>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <a href="#">
+                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+                  <Sparkles className="size-4" />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-medium">LemonSpace</span>
+                  <span className="truncate text-xs">Builder</span>
+                </div>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent>
+        <NavMain items={data.navMain} />
+        <NavProjects projects={data.projects} />
+        <NavSecondary items={data.navSecondary} className="mt-auto" />
+      </SidebarContent>
+      <SidebarFooter>
+        <NavUser user={userData} />
+      </SidebarFooter>
+    </Sidebar>
+  );
+}
