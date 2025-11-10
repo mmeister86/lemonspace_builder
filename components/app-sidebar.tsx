@@ -29,73 +29,88 @@ import { useUser } from "@/app/lib/user-context";
 const data = {
   navMain: [
     {
+      id: "boards",
       title: "Boards",
       url: "#",
       icon: Layout,
       isActive: true,
       items: [
         {
+          id: "boards-all",
           title: "Alle Boards",
           url: "#",
         },
         {
+          id: "boards-favorites",
           title: "Favoriten",
           url: "#",
         },
         {
+          id: "boards-recent",
           title: "Zuletzt verwendet",
           url: "#",
         },
       ],
     },
     {
+      id: "media",
       title: "Media",
       url: "#",
       icon: Image,
       items: [
         {
+          id: "media-images",
           title: "Bilder",
           url: "#",
         },
         {
+          id: "media-videos",
           title: "Videos",
           url: "#",
         },
         {
+          id: "media-uploads",
           title: "Uploads",
           url: "#",
         },
       ],
     },
     {
+      id: "templates",
       title: "Templates",
       url: "#",
       icon: FileText,
       items: [
         {
+          id: "templates-browse",
           title: "Vorlagen durchsuchen",
           url: "#",
         },
         {
+          id: "templates-my",
           title: "Meine Vorlagen",
           url: "#",
         },
       ],
     },
     {
+      id: "settings",
       title: "Einstellungen",
       url: "#",
       icon: Settings2,
       items: [
         {
+          id: "settings-general",
           title: "Allgemein",
           url: "#",
         },
         {
+          id: "settings-account",
           title: "Account",
           url: "#",
         },
         {
+          id: "settings-subscription",
           title: "Abonnement",
           url: "#",
         },
