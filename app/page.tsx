@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import AuthGuard from "./components/AuthGuard";
 import { AppSidebar } from "@/components/app-sidebar";
 import {
@@ -14,16 +17,20 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { ViewportSwitcher, ViewportSize } from "@/components/viewport-switcher";
 import Canvas from "./components/Canvas";
 
 export default function Home() {
+  const [currentViewport, setCurrentViewport] =
+    useState<ViewportSize>("desktop");
+
   return (
     <AuthGuard>
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2">
-            <div className="flex items-center gap-2 px-4">
+          <header className="flex h-16 shrink-0 items-center justify-between">
+            <div className="flex items-center gap-2 px-4 flex-1">
               <SidebarTrigger className="-ml-1" />
               <Separator
                 orientation="vertical"
@@ -32,9 +39,7 @@ export default function Home() {
               <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem className="hidden md:block">
-                    <BreadcrumbLink href="#">
-                      LemonSpace Builder
-                    </BreadcrumbLink>
+                    <BreadcrumbLink href="#">LemonSpace Builder</BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator className="hidden md:block" />
                   <BreadcrumbItem>
@@ -43,8 +48,14 @@ export default function Home() {
                 </BreadcrumbList>
               </Breadcrumb>
             </div>
+            <div className="px-4">
+              <ViewportSwitcher
+                currentViewport={currentViewport}
+                onViewportChange={setCurrentViewport}
+              />
+            </div>
           </header>
-          <Canvas />
+          <Canvas currentViewport={currentViewport} />
         </SidebarInset>
       </SidebarProvider>
     </AuthGuard>
