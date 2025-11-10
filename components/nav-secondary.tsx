@@ -15,6 +15,7 @@ export function NavSecondary({
   ...props
 }: {
   items: {
+    id: string;
     title: string;
     url: string;
     icon: LucideIcon;
@@ -25,7 +26,7 @@ export function NavSecondary({
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => (
-            <SidebarMenuItem key={item.url}>
+            <SidebarMenuItem key={item.id}>
               <SidebarMenuButton asChild size="sm">
                 <Link href={item.url}>
                   <item.icon />

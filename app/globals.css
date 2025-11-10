@@ -121,4 +121,12 @@
   body {
     @apply bg-background text-foreground;
   }
+  ::selection {
+    background-color: var(--lemonspace);
+    color: white;
+  }
+  ::-moz-selection {
+    background-color: var(--lemonspace);
+    color: white;
+  }
 }
