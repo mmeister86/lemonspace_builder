@@ -54,7 +54,7 @@ export function ViewportSwitcher({
             size="icon-sm"
             onClick={() => onViewportChange(viewport as ViewportSize)}
             className={cn(
-              "h-8 w-8",
+              "h-8 w-8 cursor-pointer",
               isActive && "bg-primary text-primary-foreground"
             )}
             title={`Switch to ${config.label} view`}

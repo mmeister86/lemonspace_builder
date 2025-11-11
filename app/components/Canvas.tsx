@@ -22,11 +22,11 @@ export default function Canvas({ currentViewport }: CanvasProps) {
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-      <div className="flex flex-1 items-start justify-center rounded-xl border-2 border-dashed border-muted bg-muted/20 min-h-[600px] p-4">
+      <div className="flex flex-1 items-start justify-center rounded-xl border-2 border-dashed border-muted bg-muted/20 min-h-[600px] p-4 w-full max-w-[1200px] mx-auto">
         <div
           className={`${getViewportClasses(
             currentViewport
-          )} transition-all duration-300 ease-in-out h-full min-h-[500px] bg-white rounded-lg shadow-lg border`}
+          )} transition-[width,max-width] duration-300 ease-in-out h-full min-h-[500px] bg-white rounded-lg shadow-lg border`}
         >
           <div className="p-6 h-full flex flex-col">
             <div className="text-center">
