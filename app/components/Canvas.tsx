@@ -2,7 +2,9 @@
 
 import { ViewportSize } from "@/components/viewport-switcher";
 import { DropArea } from "./DropArea";
+import { BlockDeleteButton } from "./BlockDeleteButton";
 import { useCanvasStore } from "@/lib/stores/canvas-store";
+import { cn } from "@/lib/utils";
 
 interface CanvasProps {
   currentViewport: ViewportSize;
@@ -10,6 +12,8 @@ interface CanvasProps {
 
 export default function Canvas({ currentViewport }: CanvasProps) {
   const blocks = useCanvasStore((state) => state.blocks);
+  const selectedBlockId = useCanvasStore((state) => state.selectedBlockId);
+  const selectBlock = useCanvasStore((state) => state.selectBlock);
 
   const getViewportClasses = (viewport: ViewportSize) => {
     switch (viewport) {
@@ -32,7 +36,10 @@ export default function Canvas({ currentViewport }: CanvasProps) {
             currentViewport
           )} transition-[width,max-width] duration-300 ease-in-out h-full min-h-[500px] bg-white rounded-lg shadow-lg border`}
         >
-          <div className="p-6 h-full flex flex-col">
+          <div
+            className="p-6 h-full flex flex-col"
+            onClick={() => selectBlock(null)}
+          >
             <div className="flex flex-col gap-4 flex-1">
               {blocks.length > 0 && (
                 <>
@@ -50,19 +57,46 @@ export default function Canvas({ currentViewport }: CanvasProps) {
                   </div>
                   {/* Blöcke werden später mit Grid-Layout angezeigt */}
                   <div className="space-y-4">
-                    {blocks.map((block) => (
-                      <div
-                        key={block.id}
-                        className="p-4 border rounded-lg bg-background"
-                      >
-                        <div className="text-sm font-medium mb-2">
-                          Block: {block.type}
+                    {blocks.map((block) => {
+                      const isSelected = selectedBlockId === block.id;
+                      return (
+                        <div
+                          key={block.id}
+                          tabIndex={0}
+                          role="button"
+                          className={cn(
+                            "p-4 border rounded-lg bg-background relative",
+                            "cursor-pointer transition-all",
+                            "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+                            isSelected &&
+                              "ring-2 ring-primary ring-offset-2 border-primary"
+                          )}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            selectBlock(block.id);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.stopPropagation();
+                              if (e.key === " ") {
+                                e.preventDefault();
+                              }
+                              selectBlock(block.id);
+                            }
+                          }}
+                        >
+                          {isSelected && (
+                            <BlockDeleteButton blockId={block.id} />
+                          )}
+                          <div className="text-sm font-medium mb-2">
+                            Block: {block.type}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            ID: {block.id}
+                          </div>
                         </div>
-                        <div className="text-xs text-muted-foreground">
-                          ID: {block.id}
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </>
               )}

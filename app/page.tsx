@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import AuthGuard from "./components/AuthGuard";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
@@ -16,6 +16,7 @@ import { BuilderMenubar } from "./components/BuilderMenubar";
 import { useCanvasStore } from "@/lib/stores/canvas-store";
 import { ID } from "@/app/lib/appwrite";
 import type { Block, BlockType } from "@/lib/types/board";
+import { BlockDeleteDialog } from "./components/BlockDeleteDialog";
 
 // Valide Block-Typen für Runtime-Validierung
 const VALID_BLOCK_TYPES: BlockType[] = [
@@ -35,7 +36,9 @@ const VALID_BLOCK_TYPES: BlockType[] = [
 export default function Home() {
   const [currentViewport, setCurrentViewport] =
     useState<ViewportSize>("desktop");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const addBlock = useCanvasStore((state) => state.addBlock);
+  const selectedBlockId = useCanvasStore((state) => state.selectedBlockId);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -106,6 +109,52 @@ export default function Home() {
     }
   };
 
+  // Keyboard-Shortcut für Löschen (Delete/Backspace)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Prüfe ob Delete oder Backspace gedrückt wurde
+      if ((e.key === "Delete" || e.key === "Backspace") && selectedBlockId) {
+        // Prüfe ob das Event-Target ein editierbares Element ist
+        const target = e.target as HTMLElement | null;
+        if (!target) {
+          return;
+        }
+
+        // Prüfe ob das Element selbst ein Input, Textarea oder Select ist
+        const tagName = target.tagName.toLowerCase();
+        if (
+          tagName === "input" ||
+          tagName === "textarea" ||
+          tagName === "select"
+        ) {
+          return;
+        }
+
+        // Prüfe ob das Element oder ein Parent-Element contentEditable ist
+        let element: HTMLElement | null = target;
+        while (element) {
+          if (
+            element.contentEditable === "true" ||
+            element.contentEditable === "plaintext-only"
+          ) {
+            return;
+          }
+          element = element.parentElement;
+        }
+
+        // Verhindere Standard-Verhalten (z.B. Browser-Navigation)
+        e.preventDefault();
+        // Öffne Delete-Dialog
+        setDeleteDialogOpen(true);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [selectedBlockId]);
+
   return (
     <AuthGuard>
       <DndContext onDragEnd={handleDragEnd}>
@@ -131,6 +180,11 @@ export default function Home() {
             <Canvas currentViewport={currentViewport} />
           </SidebarInset>
         </SidebarProvider>
+        <BlockDeleteDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          blockId={selectedBlockId}
+        />
       </DndContext>
     </AuthGuard>
   );
