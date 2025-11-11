@@ -19,6 +19,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
 
 export function NavMain({
   items,
@@ -59,15 +60,31 @@ export function NavMain({
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
-                      {item.items?.map((subItem) => (
-                        <SidebarMenuSubItem key={subItem.id}>
-                          <SidebarMenuSubButton asChild>
-                            <Link href={subItem.url}>
-                              <span>{subItem.title}</span>
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
+                      {item.items?.map((subItem) => {
+                        // Separator behandeln
+                        if (
+                          subItem.title === "---" ||
+                          subItem.id.includes("separator")
+                        ) {
+                          return (
+                            <SidebarMenuSubItem
+                              key={subItem.id}
+                              className="my-1"
+                            >
+                              <Separator className="mx-2" />
+                            </SidebarMenuSubItem>
+                          );
+                        }
+                        return (
+                          <SidebarMenuSubItem key={subItem.id}>
+                            <SidebarMenuSubButton asChild>
+                              <Link href={subItem.url}>
+                                <span>{subItem.title}</span>
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        );
+                      })}
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </>

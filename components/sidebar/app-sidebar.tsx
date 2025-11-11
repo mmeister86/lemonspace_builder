@@ -5,26 +5,21 @@ import {
   Layout,
   Image,
   FileText,
-  Settings2,
   LifeBuoy,
   Send,
   Sparkles,
 } from "lucide-react";
 
 import { NavMain } from "@/components/sidebar/nav-main";
-import { NavProjects } from "@/components/sidebar/nav-projects";
 import { NavSecondary } from "@/components/sidebar/nav-secondary";
-import { NavUser } from "@/components/sidebar/nav-user";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { useUser } from "@/app/lib/user-context";
 
 const data = {
   navMain: [
@@ -48,6 +43,36 @@ const data = {
         {
           id: "boards-recent",
           title: "Zuletzt verwendet",
+          url: "#",
+        },
+        {
+          id: "boards-separator",
+          title: "---",
+          url: "#",
+        },
+        {
+          id: "board-1",
+          title: "Mein erstes Board",
+          url: "#",
+        },
+        {
+          id: "board-2",
+          title: "Produktpräsentation Q4",
+          url: "#",
+        },
+        {
+          id: "board-3",
+          title: "Kundenvorstellung 2024",
+          url: "#",
+        },
+        {
+          id: "board-4",
+          title: "Marketing Kampagne",
+          url: "#",
+        },
+        {
+          id: "board-5",
+          title: "Demo Board",
           url: "#",
         },
       ],
@@ -93,29 +118,6 @@ const data = {
         },
       ],
     },
-    {
-      id: "settings",
-      title: "Einstellungen",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          id: "settings-general",
-          title: "Allgemein",
-          url: "#",
-        },
-        {
-          id: "settings-account",
-          title: "Account",
-          url: "#",
-        },
-        {
-          id: "settings-subscription",
-          title: "Abonnement",
-          url: "#",
-        },
-      ],
-    },
   ],
   navSecondary: [
     {
@@ -131,31 +133,9 @@ const data = {
       icon: Send,
     },
   ],
-  projects: [
-    {
-      name: "Mein erstes Board",
-      url: "#",
-      icon: Sparkles,
-    },
-  ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { user } = useUser();
-
-  // User-Daten aus AppWrite in das Format für NavUser umwandeln
-  const userData = user
-    ? {
-        name: user.name || user.email?.split("@")[0] || "User",
-        email: user.email || "",
-        avatar: "", // AppWrite speichert Avatar-URLs anders, falls vorhanden
-      }
-    : {
-        name: "User",
-        email: "",
-        avatar: "",
-      };
-
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -177,12 +157,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={userData} />
-      </SidebarFooter>
     </Sidebar>
   );
 }

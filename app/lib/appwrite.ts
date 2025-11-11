@@ -1,4 +1,4 @@
-import { Client, Account } from "appwrite";
+import { Client, Account, Storage } from "appwrite";
 
 // AppWrite Client-Konfiguration
 // Diese Werte sollten aus Umgebungsvariablen kommen
@@ -10,5 +10,4 @@ export const client = new Client()
   .setProject(projectId);
 
 export const account = new Account(client);
-
-
+export const storage = new Storage(client);

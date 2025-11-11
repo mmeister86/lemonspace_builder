@@ -28,6 +28,10 @@ import {
   Shield,
   Sparkles,
   FileDown,
+  BadgeCheck,
+  CreditCard,
+  Bell,
+  LogOut,
 } from "lucide-react";
 import {
   Menubar,
@@ -40,12 +44,105 @@ import {
   MenubarCheckboxItem,
   MenubarRadioGroup,
   MenubarRadioItem,
+  MenubarLabel,
 } from "@/components/ui/menubar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useUser } from "@/app/lib/user-context";
+import { storage } from "@/app/lib/appwrite";
+import { Models } from "appwrite";
+
+function getInitials(name: string): string {
+  if (!name) return "";
+  return name
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
 
 export function BuilderMenubar() {
+  const { user } = useUser();
   const [isPreviewMode, setIsPreviewMode] = React.useState(false);
   const [showGrid, setShowGrid] = React.useState(true);
   const [, setZoomLevel] = React.useState(100);
+  const [userAvatar, setUserAvatar] = React.useState<string>("");
+
+  // User-Daten aus AppWrite in das Format für User-Menü umwandeln
+  const userName = user?.name || user?.email?.split("@")[0] || "User";
+  const userEmail = user?.email || "";
+  const userInitials = getInitials(userName);
+
+  // Avatar-URL aus AppWrite Storage abrufen
+  React.useEffect(() => {
+    function fetchAvatarUrl() {
+      if (!user) {
+        setUserAvatar("");
+        return;
+      }
+
+      // Prüfe verschiedene mögliche Feldnamen für Avatar-ID
+      // AppWrite User kann Avatar-ID in prefs oder als direktes Feld haben
+      type UserWithAvatar = typeof user & {
+        avatarId?: string;
+        imageId?: string;
+        avatar?: string;
+        prefs?: Models.Preferences & {
+          avatarId?: string;
+          imageId?: string;
+          avatar?: string;
+        };
+      };
+
+      const userWithAvatar = user as UserWithAvatar;
+      const avatarIdOrUrl =
+        userWithAvatar.avatarId ||
+        userWithAvatar.imageId ||
+        userWithAvatar.avatar ||
+        userWithAvatar.prefs?.avatarId ||
+        userWithAvatar.prefs?.imageId ||
+        userWithAvatar.prefs?.avatar;
+
+      if (!avatarIdOrUrl) {
+        setUserAvatar("");
+        return;
+      }
+
+      // Wenn bereits eine vollständige URL, direkt verwenden
+      if (
+        typeof avatarIdOrUrl === "string" &&
+        avatarIdOrUrl.startsWith("http")
+      ) {
+        setUserAvatar(avatarIdOrUrl);
+        return;
+      }
+
+      // Bucket-ID aus Umgebungsvariable oder Standard-Wert
+      const bucketId =
+        process.env.NEXT_PUBLIC_APPWRITE_AVATAR_BUCKET_ID || "avatars";
+
+      try {
+        // Hole Preview-URL für Avatar-Bild (optimiert für Avatar-Größe: 128x128)
+        // getFilePreview ist synchron und gibt eine URL zurück
+        const avatarUrl = storage.getFilePreview(
+          bucketId,
+          avatarIdOrUrl,
+          128,
+          128
+        );
+        // getFilePreview gibt eine URL-String zurück
+        setUserAvatar(String(avatarUrl));
+      } catch (error) {
+        // Bei Fehler (z.B. Datei nicht gefunden, keine Berechtigung) auf leeren String zurückfallen
+        console.warn("Avatar konnte nicht geladen werden:", error);
+        setUserAvatar("");
+      }
+    }
+
+    fetchAvatarUrl();
+  }, [user]);
 
   // Platzhalter-Funktionen für zukünftige Implementierung
   const handleNewBoard = React.useCallback(() => {
@@ -163,6 +260,27 @@ export function BuilderMenubar() {
 
   const handleAccessSettings = React.useCallback(() => {
     console.log("Zugriffseinstellungen (Pro)");
+  }, []);
+
+  const handleUpgradeToPro = React.useCallback(() => {
+    console.log("Upgrade to Pro");
+  }, []);
+
+  const handleUserAccount = React.useCallback(() => {
+    console.log("Account");
+  }, []);
+
+  const handleUserBilling = React.useCallback(() => {
+    console.log("Billing");
+  }, []);
+
+  const handleUserNotifications = React.useCallback(() => {
+    console.log("Notifications");
+  }, []);
+
+  const handleLogout = React.useCallback(() => {
+    console.log("Logout (Platzhalter)");
+    // TODO: Implementiere Logout mit AppWrite account.deleteSession()
   }, []);
 
   // Globale Keyboard-Shortcuts
@@ -467,6 +585,62 @@ export function BuilderMenubar() {
             <Shield className="mr-2 h-4 w-4" />
             <span>Zugriffseinstellungen</span>
             <ProBadge />
+          </MenubarItem>
+        </MenubarContent>
+      </MenubarMenu>
+
+      {/* User-Menü */}
+      <MenubarMenu>
+        <MenubarTrigger className="text-sm px-3 py-1.5">
+          <div className="flex items-center gap-2">
+            <Avatar className="h-5 w-5 rounded-lg">
+              <AvatarImage src={userAvatar} alt={userName} />
+              <AvatarFallback className="rounded-lg text-xs">
+                {userInitials}
+              </AvatarFallback>
+            </Avatar>
+            <span className="max-w-[120px] truncate">{userName}</span>
+          </div>
+        </MenubarTrigger>
+        <MenubarContent>
+          <MenubarLabel className="p-0 font-normal">
+            <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+              <Avatar className="h-8 w-8 rounded-lg">
+                <AvatarImage src={userAvatar} alt={userName} />
+                <AvatarFallback className="rounded-lg">
+                  {userInitials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-medium">{userName}</span>
+                <span className="truncate text-xs text-muted-foreground">
+                  {userEmail}
+                </span>
+              </div>
+            </div>
+          </MenubarLabel>
+          <MenubarSeparator />
+          <MenubarItem onClick={handleUpgradeToPro}>
+            <Sparkles className="mr-2 h-4 w-4" />
+            <span>Auf Pro upgraden</span>
+          </MenubarItem>
+          <MenubarSeparator />
+          <MenubarItem onClick={handleUserAccount}>
+            <BadgeCheck className="mr-2 h-4 w-4" />
+            <span>Konto</span>
+          </MenubarItem>
+          <MenubarItem onClick={handleUserBilling}>
+            <CreditCard className="mr-2 h-4 w-4" />
+            <span>Abrechnung</span>
+          </MenubarItem>
+          <MenubarItem onClick={handleUserNotifications}>
+            <Bell className="mr-2 h-4 w-4" />
+            <span>Benachrichtigungen</span>
+          </MenubarItem>
+          <MenubarSeparator />
+          <MenubarItem onClick={handleLogout}>
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Abmelden</span>
           </MenubarItem>
         </MenubarContent>
       </MenubarMenu>
